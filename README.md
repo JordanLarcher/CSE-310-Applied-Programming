@@ -1,25 +1,24 @@
-# CSE-310-Applied-Programming
+#Overview
 
-# Overview
+As a software engineer, my goal is to enhance my programming skills. This project is a simple "Hello World" application in Scala, allowing me to get familiar with the language's syntax and development environment.
 
-{Important!  Do not say in this section that this is college assignment.  Talk about what you are trying to accomplish as a software engineer to further your learning.}
+The software prints "Hello, World!" to the console, serving as an introductory exercise to build a solid foundation in Scala for future projects.
 
-{Provide a description of your software}
+Software Demo Video
+Development Environment
 
-{Describe your purpose for creating this software.}
+To develop this software, I used the following tools:
 
-{Provide a link to your YouTube demonstration.  It should be a one minute demo of the software running and a walkthrough of the code.}
+    IDE: IntelliJ IDEA, which provides excellent support for Scala development, including code completion and debugging features.
+    Build Tool: SBT (Scala Build Tool) was used to manage project dependencies and build configurations efficiently.
 
-[Software Demo Video](http://youtube.link.goes.here)
+The programming language I chose for this project is Scala. Scala combines object-oriented and functional programming paradigms, allowing for concise and expressive code. Its interoperability with Java also enables the use of existing Java libraries, making it a versatile choice for software development.
+Useful Websites
 
-# Development Environment
+Here are some websites that I found particularly helpful during this project:
 
-{Describe the tools that you used to develop the software}
+    Scala Documentation
+    SBT Documentation
+    Scala Exercises
+    Stack Overflow - A great resource for troubleshooting and finding solutions to specific programming questions.
 
-{Describe the programming language that you used}
-
-# Useful Websites
-
-{Make a list of websites that you found helpful in this project}
-* [Web Site Name](http://url.link.goes.here)
-* [Web Site Name](http://url.link.goes.here)
