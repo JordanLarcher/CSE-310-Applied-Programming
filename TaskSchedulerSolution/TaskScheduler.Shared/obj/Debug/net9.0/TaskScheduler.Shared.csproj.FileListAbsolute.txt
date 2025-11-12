@@ -1,0 +1,12 @@
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/bin/Debug/net9.0/TaskScheduler.Shared.deps.json
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/bin/Debug/net9.0/TaskScheduler.Shared.dll
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/bin/Debug/net9.0/TaskScheduler.Shared.pdb
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.GeneratedMSBuildEditorConfig.editorconfig
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.AssemblyInfoInputs.cache
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.AssemblyInfo.cs
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.csproj.CoreCompileInputs.cache
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.sourcelink.json
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.dll
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/refint/TaskScheduler.Shared.dll
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/TaskScheduler.Shared.pdb
+/media/jor/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Shared/obj/Debug/net9.0/ref/TaskScheduler.Shared.dll
