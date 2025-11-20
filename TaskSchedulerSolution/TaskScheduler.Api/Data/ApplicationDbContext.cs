@@ -1,6 +1,13 @@
-namespace TaskScheduler.Api.Data;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using TaskScheduler.Shared;
 
-public class ApplicationDbContext
+namespace TaskScheduler.Api.Data
 {
-    
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
+    }
 }

@@ -1,6 +1,9 @@
 namespace TaskScheduler.Domain.Interfaces;
 
-public class INotificationSettingsRepository
+using System.Threading.Tasks;
+using TaskScheduler.Domain.Entities;
+
+public interface INotificationSettingsRepository : IRepository<NotificationSettings>
 {
-    
+    Task<NotificationSettings?> GetByUserIdAsync(int userId);
 }

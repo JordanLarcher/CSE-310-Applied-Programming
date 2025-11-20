@@ -1,7 +1,63 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Task Scheduler - Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Organize Your Tasks,<br />Simplify Your Life</h1>
+                <p class="lead mb-4">
+                    Take control of your day with our intuitive task scheduler. Create, organize, and track your tasks with ease.
+                </p>
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/tasks" class="btn btn-primary btn-lg me-2">
+                            <i class="bi bi-list-task"></i> Go to My Tasks
+                        </a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/register" class="btn btn-primary btn-lg me-2">
+                            <i class="bi bi-person-plus"></i> Get Started
+                        </a>
+                        <a href="/login" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <div class="col-lg-6">
+                <div class="features-grid mt-5 mt-lg-0">
+                    <div class="feature-card">
+                        <div class="feature-icon bg-primary">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h5>Task Management</h5>
+                        <p>Create and organize tasks with priorities and categories</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon bg-success">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <h5>Smart Reminders</h5>
+                        <p>Never miss a deadline with customizable notifications</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon bg-info">
+                            <i class="bi bi-calendar"></i>
+                        </div>
+                        <h5>Due Dates</h5>
+                        <p>Track deadlines and stay on top of your schedule</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon bg-warning">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h5>Progress Tracking</h5>
+                        <p>Monitor your productivity and completion rates</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

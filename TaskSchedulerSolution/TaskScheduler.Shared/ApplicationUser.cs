@@ -1,6 +1,10 @@
-namespace TaskScheduler.Shared;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Identity;
 
-public class ApplicationUser
+namespace TaskScheduler.Shared
 {
-    
+    public class ApplicationUser : IdentityUser
+    {
+        
+    }
 }

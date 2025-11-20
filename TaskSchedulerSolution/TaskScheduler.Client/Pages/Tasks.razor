@@ -1,140 +1,222 @@
 @page "/tasks"
-@using TaskScheduler.Shared
-@using System.Net.Http.Json
-@inject HttpClient Http
+@attribute [Authorize]
+@inject TaskApiService TaskService
+@inject CategoryApiService CategoryService
+@inject NavigationManager Navigation
 
-<PageTitle>Task Scheduler</PageTitle>
+<PageTitle>My Tasks - Task Scheduler</PageTitle>
 
-<h1>Task Scheduler</h1>
-
-<!-- ************************** -->
-<!-- SECTION 1: CREATE TASK FORM -->
-<!-- ************************** -->
-<div class="card bg-light shadow-sm mb-4">
-    <div class="card-body">
-        <!-- EditForm is Blazor's way of handling forms.
-             We bind it to our 'newTask' variable. -->
-        <EditForm Model="@newTask" OnValidSubmit="@CreateTask">
-            <!-- This tells the form to use data validation (e.g., [Required]) -->
-            <DataAnnotationsValidator />
-
-            <div class="mb-3">
-                <label for="title" class="form-label">Task Title</label>
-                <!-- @bind-Value links this input to the 'Title' property
-                     of our 'newTask' variable. -->
-                <InputText id="title" class="form-control" @bind-Value="newTask.Title" />
-                <!-- This displays validation errors for the 'Title' property -->
-                <ValidationMessage For="@(() => newTask.Title)" />
-            </div>
-
-            <div class="mb-3">
-                <label for="due-date" class="form-label">Due Date</label>
-                <InputDate id="due-date" class="form-control" @bind-Value="newTask.DueDate" />
-            </div>
-
-            <div class="mb-3">
-                <label for="reminder-time" class="form-label">Reminder Time (Optional)</label>
-                <InputDate id="reminder-time" class="form-control" @bind-Value="newTask.ReminderTime" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add Task</button>
-        </EditForm>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-list-task"></i> My Tasks</h1>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            <i class="bi bi-plus-circle"></i> New Task
+        </button>
     </div>
+
+    <TaskFilters Categories="@categories" OnStatusFilterChanged="@HandleStatusFilter"
+        OnPriorityFilterChanged="@HandlePriorityFilter" OnCategoryFilterChanged="@HandleCategoryFilter"
+        OnSearchFilterChanged="@HandleSearchFilter" OnOverdueFilterChanged="@HandleOverdueFilter"
+        ShowOverdue="@showOverdue" />
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading tasks...</span>
+            </div>
+        </div>
+    }
+    else if (!filteredTasks.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> No tasks found. Create your first task to get started!
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var task in filteredTasks)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <TaskCard Task="@task" OnTaskClick="@(EventCallback.Factory.Create<TaskDto>(this, HandleTaskClick))"
+                        OnEditTask="@(EventCallback.Factory.Create<TaskDto>(this, HandleEditTask))"
+                        OnDeleteTask="@(EventCallback.Factory.Create<TaskDto>(this, HandleDeleteTask))" />
+                </div>
+            }
+        </div>
+    }
 </div>
 
+<TaskModal IsVisible="@showModal" IsEditMode="@isEditMode" TaskToEdit="@selectedTask" Categories="@categories"
+    OnCreate="@HandleCreateTask" OnUpdate="@HandleUpdateTask" OnClose="@CloseModal" />
 
-<!-- ************************** -->
-<!-- SECTION 2: TASK LIST       -->
-<!-- ************************** -->
-
-@if (tasks == null)
-{
-    <p><em>Loading tasks...</em></p>
-}
-else
-{
-    <ul class="list-group shadow-sm">
-        <!-- REQUIREMENT: Loops -->
-        <!-- We loop over the 'tasks' list and render a row for each one. -->
-        @foreach (var task in tasks)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <!-- REQUIREMENT: Conditionals (Ternary Operator) -->
-                    <!-- This expression changes the style based on a condition. -->
-                    <input type="checkbox" class="form-check-input me-2"
-                           checked="@task.IsComplete" 
-                           @onchange="@(async (ChangeEventArgs e) => { task.IsComplete = (bool)e.Value!; await UpdateTask(task); })" />
-                    
-                    <span style="@(task.IsComplete ? "text-decoration: line-through; opacity: 0.6;" : "")">
-                        <strong>@task.Title</strong>
-                        <br />
-                        <small>Due: @task.DueDate.ToShortDateString()</small>
-                        @if (task.ReminderTime.HasValue)
-                        {
-                            <small class="ms-2 fst-italic text-muted">
-                                (Reminder: @task.ReminderTime.Value.ToShortTimeString())
-                            </small>
-                        }
-                    </span>
-                </div>
-                
-                <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteTask(task.Id))">
-                    Delete
-                </button>
-            </li>
-        }
-    </ul>
-}
-
-<!-- ************************** -->
-<!-- SECTION 3: C# CODE BLOCK   -->
-<!-- ************************** -->
 @code {
-    // REQUIREMENT: Variables
-    // These are variables that hold the state for our page.
-    private List<TaskItem>? tasks;
-    private TaskItem newTask = new TaskItem();
+    private List<TaskDto> tasks = new();
+    private List<TaskDto> filteredTasks = new();
+    private List<Client.Models.CategoryDto> categories = new();
+    private TaskDto? selectedTask;
+    private bool isLoading = true;
+    private bool showModal;
+    private bool isEditMode;
+    private bool showOverdue;
 
-    // REQUIREMENT: Functions (Methods)
-    // This function is a built-in Blazor event. It runs
-    // automatically when the page is first loaded.
+    // Filters
+    private string? statusFilter;
+    private string? priorityFilter;
+    private int? categoryFilter;
+    private string? searchFilter;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadTasks();
+        await LoadCategories();
     }
 
-    // Function to get all tasks from our API
     private async Task LoadTasks()
     {
         try
         {
-            // Http.GetFromJsonAsync sends a GET request to our API
-            // (e.g., GET /api/Tasks) and automatically converts
-            // the JSON response into a List<TaskItem>.
-            tasks = await Http.GetFromJsonAsync<List<TaskItem>>("api/Tasks");
+            isLoading = true;
+            tasks = await TaskService.GetAllTasksAsync();
+            ApplyFilters();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading tasks: {ex.Message}");
         }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
-    // Function to create a new task
-    private async Task CreateTask()
+    private async Task LoadCategories()
     {
         try
         {
-            // Http.PostAsJsonAsync sends a POST request to our API
-            // (e.g., POST /api/Tasks) with the 'newTask' object
-            // converted to JSON in the body.
-            var response = await Http.PostAsJsonAsync("api/Tasks", newTask);
-
-            if (response.IsSuccessStatusCode)
+            var apiCategories = await CategoryService.GetAllCategoriesAsync();
+            categories = apiCategories.Select(c => new Client.Models.CategoryDto
             {
-                newTask = new TaskItem(); // Reset the form
-                await LoadTasks();        // Refresh the list
+                Id = c.Id,
+                Name = c.Name
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading categories: {ex.Message}");
+            // Fallback to empty list
+            categories = new List<Client.Models.CategoryDto>();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var filtered = tasks.AsEnumerable();
+
+        if (!string.IsNullOrEmpty(statusFilter))
+        {
+            filtered = filtered.Where(t => t.Status.ToString() == statusFilter);
+        }
+
+        if (!string.IsNullOrEmpty(priorityFilter))
+        {
+            filtered = filtered.Where(t => t.Priority.ToString() == priorityFilter);
+        }
+
+        if (categoryFilter.HasValue)
+        {
+            filtered = filtered.Where(t => t.CategoryId == categoryFilter.Value);
+        }
+
+        if (!string.IsNullOrEmpty(searchFilter))
+        {
+            filtered = filtered.Where(t =>
+            t.Title.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+            (t.Description != null && t.Description.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        if (showOverdue)
+        {
+            filtered = filtered.Where(t => t.IsOverdue);
+        }
+
+        filteredTasks = filtered.ToList();
+    }
+
+    private void HandleStatusFilter(string? status)
+    {
+        statusFilter = status;
+        ApplyFilters();
+    }
+
+    private void HandlePriorityFilter(string? priority)
+    {
+        priorityFilter = priority;
+        ApplyFilters();
+    }
+
+    private void HandleCategoryFilter(int? categoryId)
+    {
+        categoryFilter = categoryId;
+        ApplyFilters();
+    }
+
+    private void HandleSearchFilter(string? search)
+    {
+        searchFilter = search;
+        ApplyFilters();
+    }
+
+    private void HandleOverdueFilter(bool overdue)
+    {
+        showOverdue = overdue;
+        ApplyFilters();
+    }
+
+    private void OpenCreateModal()
+    {
+        isEditMode = false;
+        selectedTask = null;
+        showModal = true;
+    }
+
+    private void HandleTaskClick(TaskDto task)
+    {
+        // Can expand to show task details
+        Console.WriteLine($"Task clicked: {task.Title}");
+    }
+
+    private void HandleEditTask(TaskDto task)
+    {
+        isEditMode = true;
+        selectedTask = task;
+        showModal = true;
+    }
+
+    private async Task HandleDeleteTask(TaskDto task)
+    {
+        if (confirm($"Are you sure you want to delete '{task.Title}'?"))
+        {
+            try
+            {
+                await TaskService.DeleteTaskAsync(task.Id);
+                await LoadTasks();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting task: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task HandleCreateTask(CreateTaskDto createDto)
+    {
+        try
+        {
+            await TaskService.CreateTaskAsync(createDto);
+            await LoadTasks();
         }
         catch (Exception ex)
         {
@@ -142,17 +224,11 @@ else
         }
     }
 
-    // Function to update a task (e.g., mark as complete)
-    private async Task UpdateTask(TaskItem task)
+    private async Task HandleUpdateTask((int Id, UpdateTaskDto Task) update)
     {
         try
         {
-            // Http.PutAsJsonAsync sends a PUT request
-            // (e.g., PUT /api/Tasks/5) with the updated task object.
-            await Http.PutAsJsonAsync($"api/Tasks/{task.Id}", task);
-            
-            // We don't need to reload the whole list, but we
-            // will just to ensure data is consistent.
+            await TaskService.UpdateTaskAsync(update.Id, update.Task);
             await LoadTasks();
         }
         catch (Exception ex)
@@ -161,20 +237,15 @@ else
         }
     }
 
-    // Function to delete a task
-    private async Task DeleteTask(int id)
+    private void CloseModal()
     {
-        try
-        {
-            // Http.DeleteAsync sends a DELETE request
-            // (e.g., DELETE /api/Tasks/5)
-            await Http.DeleteAsync($"api/Tasks/{id}");
-            
-            await LoadTasks(); // Refresh the list
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error deleting task: {ex.Message}");
-        }
+        showModal = false;
+        selectedTask = null;
+    }
+
+    private bool confirm(string message)
+    {
+        // TODO: Replace with proper confirmation dialog
+        return true;
     }
 }

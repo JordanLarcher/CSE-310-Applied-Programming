@@ -1,0 +1,156 @@
+{
+  "format": 1,
+  "restore": {
+    "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Application/TaskScheduler.Application.csproj": {}
+  },
+  "projects": {
+    "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Application/TaskScheduler.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Application/TaskScheduler.Application.csproj",
+        "projectName": "TaskScheduler.Application",
+        "projectPath": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Application/TaskScheduler.Application.csproj",
+        "packagesPath": "/home/jor/.nuget/packages/",
+        "outputPath": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/jor/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/TaskScheduler.Domain.csproj": {
+                "projectPath": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/TaskScheduler.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.11.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.2.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.307/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/TaskScheduler.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/TaskScheduler.Domain.csproj",
+        "projectName": "TaskScheduler.Domain",
+        "projectPath": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/TaskScheduler.Domain.csproj",
+        "packagesPath": "/home/jor/.nuget/packages/",
+        "outputPath": "/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/jor/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.307/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

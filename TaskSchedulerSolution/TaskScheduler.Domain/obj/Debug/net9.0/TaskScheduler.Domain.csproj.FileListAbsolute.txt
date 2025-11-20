@@ -1,0 +1,12 @@
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/bin/Debug/net9.0/TaskScheduler.Domain.deps.json
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/bin/Debug/net9.0/TaskScheduler.Domain.dll
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/bin/Debug/net9.0/TaskScheduler.Domain.pdb
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.AssemblyInfoInputs.cache
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.AssemblyInfo.cs
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.csproj.CoreCompileInputs.cache
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.sourcelink.json
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.dll
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/refint/TaskScheduler.Domain.dll
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/TaskScheduler.Domain.pdb
+/mnt/Space/BYU/CSE-310-Applied-Programming/TaskSchedulerSolution/TaskScheduler.Domain/obj/Debug/net9.0/ref/TaskScheduler.Domain.dll

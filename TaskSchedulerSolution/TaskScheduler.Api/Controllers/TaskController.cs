@@ -1,98 +1,132 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskScheduler.Shared; // <-- Import our shared models
+using System.Security.Claims;
+using TaskScheduler.Application.DTOs.Tasks;
+using TaskScheduler.Application.Services.Interfaces;
 
 namespace TaskScheduler.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Sets the URL path to /api/Tasks
+    [Route("api/[controller]")]
+    [Authorize]
     public class TasksController : ControllerBase
     {
-        // For this module, we use a simple in-memory list.
-        // 'static' ensures the list persists between requests.
-        // This list stores our 'variables' (the tasks).
-        private static readonly List<TaskItem> _tasks = new List<TaskItem>();
-        private static int _nextId = 1;
+        private readonly ITaskService _taskService;
 
-        // REQUIREMENT: Functions (Methods)
-        // This is a function that handles HTTP GET requests to /api/Tasks
+        public TasksController(ITaskService taskService)
+        {
+            _taskService = taskService;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.Parse(userIdClaim ?? "0");
+        }
+
         [HttpGet]
-        public ActionResult<IEnumerable<TaskItem>> GetTasks()
+        public async Task<ActionResult<IEnumerable<TaskDto>>> GetTasks([FromQuery] TaskFilter? filter)
         {
-            // Returns the full list of tasks
-            return Ok(_tasks);
+            var userId = GetCurrentUserId();
+            var tasks = await _taskService.GetUserTasksAsync(userId, filter);
+            return Ok(tasks);
         }
 
-        // Handles GET requests to /api/Tasks/{id}
         [HttpGet("{id}")]
-        public ActionResult<TaskItem> GetTask(int id)
+        public async Task<ActionResult<TaskDto>> GetTask(int id)
         {
-            var task = _tasks.FirstOrDefault(t => t.Id == id);
-            
-            // REQUIREMENT: Conditionals
-            if (task == null)
+            try
             {
-                return NotFound(); // Returns 404 if task doesn't exist
+                var userId = GetCurrentUserId();
+                var task = await _taskService.GetTaskByIdAsync(userId, id);
+                return Ok(task);
             }
-            return Ok(task); // Returns 200 with the task
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
-        // REQUIREMENT: Functions (Methods)
-        // This function handles HTTP POST requests to /api/Tasks
+        [HttpGet("overdue")]
+        public async Task<ActionResult<IEnumerable<TaskDto>>> GetOverdueTasks()
+        {
+            var userId = GetCurrentUserId();
+            var tasks = await _taskService.GetOverdueTasksAsync(userId);
+            return Ok(tasks);
+        }
+
+        [HttpGet("statistics")]
+        public async Task<ActionResult<TaskStatisticsDto>> GetStatistics()
+        {
+            var userId = GetCurrentUserId();
+            var stats = await _taskService.GetTaskStatisticsAsync(userId);
+            return Ok(stats);
+        }
+
         [HttpPost]
-        public ActionResult<TaskItem> CreateTask(TaskItem task)
+        public async Task<ActionResult<TaskDto>> CreateTask([FromBody] CreateTaskDto dto)
         {
-            // REQUIREMENT: Expressions
-            // This is an assignment expression.
-            task.Id = _nextId++; // Assign new ID and increment
-            
-            _tasks.Add(task);
-
-            // Returns a 201 Created status with the new task
-            return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+            try
+            {
+                var userId = GetCurrentUserId();
+                var task = await _taskService.CreateTaskAsync(dto, userId);
+                return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // Handles HTTP PUT requests to /api/Tasks/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateTask(int id, TaskItem updatedTask)
+        public async Task<ActionResult<TaskDto>> UpdateTask(int id, [FromBody] UpdateTaskDto dto)
         {
-            // REQUIREMENT: Conditionals
-            if (id != updatedTask.Id)
+            try
             {
-                return BadRequest(); // 400 Bad Request
+                var userId = GetCurrentUserId();
+                var task = await _taskService.UpdateTaskAsync(id, dto, userId);
+                return Ok(task);
             }
-
-            var existingTask = _tasks.FirstOrDefault(t => t.Id == id);
-            if (existingTask == null)
+            catch (InvalidOperationException ex)
             {
-                return NotFound(); // 404 Not Found
+                return BadRequest(new { message = ex.Message });
             }
-
-            // Update the existing task's properties
-            existingTask.Title = updatedTask.Title;
-            existingTask.Description = updatedTask.Description;
-            existingTask.DueDate = updatedTask.DueDate;
-            existingTask.IsComplete = updatedTask.IsComplete;
-            existingTask.ReminderTime = updatedTask.ReminderTime;
-            existingTask.IsReminderSent = updatedTask.IsReminderSent; // Allow resetting reminders
-            existingTask.Config = updatedTask.Config;
-
-            return NoContent(); // 204 No Content (success)
         }
 
-        // Handles HTTP DELETE requests to /api/Tasks/{id}
-        [HttpDelete("{id}")]
-        public IActionResult DeleteTask(int id)
+        [HttpPut("{id}/complete")]
+        public async Task<ActionResult<TaskDto>> MarkAsCompleted(int id)
         {
-            var task = _tasks.FirstOrDefault(t => t.Id == id);
-            
-            // REQUIREMENT: Conditionals
-            if (task == null)
+            try
             {
-                return NotFound();
+                var userId = GetCurrentUserId();
+                var task = await _taskService.MarkTaskAsCompletedAsync(userId, id);
+                return Ok(task);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-            _tasks.Remove(task);
-            return NoContent(); // 204 No Content (success)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteTask(int id)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var result = await _taskService.DeleteTaskAsync(userId, id);
+
+                if (result)
+                {
+                    return Ok(new { message = "Task deleted successfully" });
+                }
+
+                return NotFound(new { message = "Task not found" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
