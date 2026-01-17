@@ -3,6 +3,7 @@ package controllers
 import javax.inject.Inject
 import models.{User, Users}
 import play.api.mvc._
+import play.api.i18n.I18nSupport
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.PostgresProfile.api._
@@ -16,8 +17,9 @@ import slick.jdbc.JdbcProfile
 
 class AuthController @Inject()(
                                 protected val dbConfigProvider: DatabaseConfigProvider,
-                                cc: ControllerComponents
-                              )(implicit ec: ExecutionContext) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] {
+                                cc: ControllerComponents,
+                                messagesApi: play.api.i18n.MessagesApi
+                              )(implicit ec: ExecutionContext) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
 
   // Muestra el formulario de registro
   def showRegister = Action { implicit request =>
@@ -45,7 +47,7 @@ class AuthController @Inject()(
       Redirect(routes.HomeController.index()).withSession("userId" -> user.id.toString)
     }.recover {
       case ex: Exception =>
-        BadRequest(views.html.register(registerForm.withGlobalError("Error: El email ya existe.")))
+        BadRequest(views.html.register(registerForm.withGlobalError("Error: Email already exists")))
     }
   }
 

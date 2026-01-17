@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="sbt: org.playframework:play-slick_2.13:6.2.0:jar" type="java-imported" external-system-id="SBT">
+    <properties groupId="org.playframework" artifactId="play-slick_2.13" version="6.2.0" baseVersion="6.2.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/playframework/play-slick_2.13/6.2.0/play-slick_2.13-6.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/playframework/play-slick_2.13/6.2.0/play-slick_2.13-6.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -6,7 +6,7 @@ import play.api.data.format.Formats
 
 // These are the DTOs Object Transporters
 // These are immutable classes as well
-case class RegisterData(email: String, password: String)
+case class RegisterData(email: String, password: String, confirmPassword: String)
 case class LoginData(email: String, password: String)
 
 object AuthForms {
@@ -15,8 +15,12 @@ object AuthForms {
   val registerForm = Form(
     mapping(
       "email" -> email,
-      "password" -> nonEmptyText(minLength = 8)
-    )(RegisterData.apply)(RegisterData.unapply)
+      "password" -> nonEmptyText(minLength = 8),
+      "confirmPassword" -> nonEmptyText
+    )(RegisterData.apply)(RegisterData.unapply).verifying(
+      "Passwords must match",
+      data => data.password == data.confirmPassword
+    )
   )
 
   // Login Form

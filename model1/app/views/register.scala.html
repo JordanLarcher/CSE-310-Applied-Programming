@@ -1,0 +1,36 @@
+@*
+ * Registration page template
+ *@
+@(registerForm: Form[forms.RegisterData])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
+
+@main("Register - Pomodoro Timer") {
+    <div class="container">
+        <h1>Register</h1>
+        
+        @if(registerForm.hasGlobalErrors) {
+            <div class="alert alert-danger">
+                @registerForm.globalError.map { error =>
+                    <p>@error.message</p>
+                }
+            </div>
+        }
+        
+        @helper.form(routes.AuthController.register()) {
+            <div class="form-group">
+                @helper.inputText(registerForm("email"), Symbol("_label") -> "Email", Symbol("class") -> "form-control")
+            </div>
+            
+            <div class="form-group">
+                @helper.inputPassword(registerForm("password"), Symbol("_label") -> "Password", Symbol("class") -> "form-control")
+            </div>
+            
+            <div class="form-group">
+                @helper.inputPassword(registerForm("confirmPassword"), Symbol("_label") -> "Confirm Password", Symbol("class") -> "form-control")
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Register</button>
+        }
+        
+        <p>Already have an account? <a href="@routes.AuthController.showLogin()">Login here</a></p>
+    </div>
+}

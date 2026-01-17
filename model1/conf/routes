@@ -3,8 +3,15 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
-GET     /                           controllers.HomeController.index()
+# Auth routes
+GET     /login                      controllers.AuthController.showLogin
+POST    /login                      controllers.AuthController.login
+GET     /register                   controllers.AuthController.showRegister
+POST    /register                   controllers.AuthController.register
+GET     /logout                     controllers.AuthController.logout
+
+# Home (temporarily we redirect to login if there is no session, we will fix this later)
+GET     /                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
