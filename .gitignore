@@ -1,4 +1,15 @@
-.bsp
+logs
+target
+/.bsp
+/.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+/.g8
+/.bsp
+application.conf
 .metals
-.scala-build
 .vscode
+.scala-build
