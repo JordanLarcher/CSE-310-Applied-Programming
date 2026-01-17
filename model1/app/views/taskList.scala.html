@@ -1,0 +1,63 @@
+@(tasks: Seq[models.Task])(implicit request: RequestHeader)
+
+@main("My Tasks") {
+    <div class="timer-header">
+        <div id="status-display">READY</div>
+        <div id="timer-display">25:00</div>
+        <div id="current-task-name" style="min-height: 24px; color: #666;"></div>
+        <button onclick="pauseTimer()" style="background: #f39c12; margin-top: 10px;">⏸ Pause</button>
+    </div>
+
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h2>My Tasks</h2>
+            <div>
+                <a href="@routes.TaskController.showCreateTask" class="btn btn-primary" style="width: auto; padding: 10px 20px;">+ New Task</a>
+                <a href="@routes.AuthController.logout()" style="margin-left: 15px; color: #7f8c8d;">Logout</a>
+            </div>
+        </div>
+
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th style="text-align: center">Progress</th>
+                    <th style="text-align: center">Status</th>
+                    <th style="text-align: right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(task <- tasks) {
+                <tr data-estimated="@task.estimatedPomodoros">
+                    <td>@task.description</td>
+                    <td style="text-align: center">@task.completedPomodoros / @task.estimatedPomodoros</td>
+                    <td style="text-align: center">
+                        @if(task.status == "done") { <span class="badge-done">Done</span> } else { ⏳ }
+                    </td>
+                    <td style="text-align: right; display: flex; justify-content: flex-end; gap: 5px;">
+                        @if(task.status != "done") {
+                           <button class="btn-start" onclick="startTimer('@task.id', '@task.description')">▶</button>
+                        }
+                        
+                        <a href="@routes.TaskController.showEditTask(task.id)" style="font-size: 1.2rem; padding: 5px;">✏️</a>
+                        
+                        <form action="@routes.TaskController.deleteTask(task.id)" method="post" style="display:inline;" onsubmit="return confirm('Delete this task?');">
+                            @helper.CSRF.formField
+                            <button type="submit" style="background:none; border:none; font-size: 1.2rem; cursor: pointer; color: #e74c3c;">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        
+        @if(tasks.isEmpty) {
+            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                <h3>No tasks yet</h3>
+                <p>Create your first task to get started with the Pomodoro timer!</p>
+                <a href="@routes.TaskController.showCreateTask" class="btn btn-primary" style="width: auto; margin-top: 10px;">+ Create First Task</a>
+            </div>
+        }
+    </div>
+    <script src="@routes.Assets.versioned("javascripts/timer.js")"></script>
+}

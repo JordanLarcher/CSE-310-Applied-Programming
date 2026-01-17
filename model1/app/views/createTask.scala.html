@@ -1,0 +1,41 @@
+@(taskForm: Form[controllers.TaskData])(implicit request: RequestHeader)
+
+@main("New Task") {
+    <div class="auth-wrapper">
+        <div class="card">
+            <h3>New Task</h3>
+            @if(taskForm.hasGlobalErrors) {
+                <div class="alert alert-danger">
+                @taskForm.globalErrors.map { error =>
+                    <div>@error.message</div>
+                }
+                </div>
+            }
+            
+            <form action="@routes.TaskController.createTask" method="post">
+                @helper.CSRF.formField
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" value="@taskForm("description").value" class="form-control" required autofocus>
+                    @if(taskForm("description").hasErrors) {
+                        <small style="color:#e74c3c">@taskForm("description").errors.head.message</small>
+                    }
+                </div>
+                
+                <div class="form-group">
+                    <label>Estimated Pomodoros</label>
+                    <input type="number" name="estimated" value="@taskForm("estimated").value.getOrElse(1)" min="1" max="10" class="form-control">
+                    @if(taskForm("estimated").hasErrors) {
+                        <small style="color:#e74c3c">@taskForm("estimated").errors.head.message</small>
+                    }
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <a href="@routes.TaskController.listTasks" class="btn" style="background:#ccc; color:#333;">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

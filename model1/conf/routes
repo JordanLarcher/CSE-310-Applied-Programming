@@ -4,14 +4,26 @@
 # ~~~~
 
 # Auth routes
-GET     /login                      controllers.AuthController.showLogin
-POST    /login                      controllers.AuthController.login
-GET     /register                   controllers.AuthController.showRegister
-POST    /register                   controllers.AuthController.register
-GET     /logout                     controllers.AuthController.logout
+GET     /login                      controllers.AuthController.showLogin()
+POST    /login                      controllers.AuthController.login()
+GET     /register                   controllers.AuthController.showRegister()
+POST    /register                   controllers.AuthController.register()
+GET     /logout                     controllers.AuthController.logout()
+
+# --- Task Routes (TaskController) ---
+GET     /tasks                      controllers.TaskController.listTasks
+GET     /tasks/new                  controllers.TaskController.showCreateTask
+POST    /tasks/new                  controllers.TaskController.createTask
+GET     /tasks/:id/edit             controllers.TaskController.showEditTask(id: java.util.UUID)
+POST    /tasks/:id/edit             controllers.TaskController.editTask(id: java.util.UUID)
+POST    /tasks/:id/delete           controllers.TaskController.deleteTask(id: java.util.UUID)
+POST    /tasks/:id/complete         controllers.TaskController.completeTask(id: java.util.UUID)
+
 
 # Home (temporarily we redirect to login if there is no session, we will fix this later)
-GET     /                           controllers.HomeController.index
+GET     /                           controllers.HomeController.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+

@@ -1,36 +1,42 @@
-@*
- * Registration page template
- *@
 @(registerForm: Form[forms.RegisterData])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
 
-@main("Register - Pomodoro Timer") {
-    <div class="container">
-        <h1>Register</h1>
-        
-        @if(registerForm.hasGlobalErrors) {
-            <div class="alert alert-danger">
-                @registerForm.globalError.map { error =>
-                    <p>@error.message</p>
+@main("Registro") {
+    <div class="auth-wrapper">
+        <div class="card">
+            <h1>Crear Cuenta</h1>
+
+            @if(registerForm.hasGlobalErrors) {
+                <div class="alert alert-danger">
+                @registerForm.globalErrors.map { error =>
+                    <div>@error.message</div>
                 }
-            </div>
-        }
-        
-        @helper.form(routes.AuthController.register()) {
-            <div class="form-group">
-                @helper.inputText(registerForm("email"), Symbol("_label") -> "Email", Symbol("class") -> "form-control")
-            </div>
-            
-            <div class="form-group">
-                @helper.inputPassword(registerForm("password"), Symbol("_label") -> "Password", Symbol("class") -> "form-control")
-            </div>
-            
-            <div class="form-group">
-                @helper.inputPassword(registerForm("confirmPassword"), Symbol("_label") -> "Confirm Password", Symbol("class") -> "form-control")
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Register</button>
-        }
-        
-        <p>Already have an account? <a href="@routes.AuthController.showLogin()">Login here</a></p>
+                </div>
+            }
+
+            <form action="@routes.AuthController.register()" method="post">
+                @helper.CSRF.formField
+
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="email" class="form-control"
+                    value="@registerForm("email").value" required>
+                    @if(registerForm("email").hasErrors) {
+                        <small style="color:#e74c3c">@registerForm("email").errors.head.message</small>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña (mín 8 caracteres)</label>
+                    <input type="password" name="password" class="form-control" required>
+                    @if(registerForm("password").hasErrors) {
+                        <small style="color:#e74c3c">La contraseña es muy corta</small>
+                    }
+                </div>
+
+                <button type="submit" class="btn btn-primary">Registrarse</button>
+            </form>
+
+            <p>¿Ya tienes cuenta? <a href="@routes.AuthController.showLogin()">Inicia sesión</a></p>
+        </div>
     </div>
 }
