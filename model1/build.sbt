@@ -17,11 +17,11 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2
 // play.sbt.routes.RoutesKeys.routesImport += "com.jlarcher.binders._"
 libraryDependencies ++= Seq(
   guice,
-  "org.playframework" %% "play-slick" % "6.2.0",           // Integración de Play con Slick
-  "org.playframework" %% "play-slick-evolutions" % "6.2.0", // Para migraciones de DB
-  "org.postgresql" % "postgresql" % "42.7.3",              // Driver de Postgres
+  "org.playframework" %% "play-slick" % "6.2.0",           // Play integration with Slick
+  "org.playframework" %% "play-slick-evolutions" % "6.2.0", // For DB migrations
+  "org.postgresql" % "postgresql" % "42.7.3",              // Postgres driver
   "com.h2database" % "h2" % "2.2.224",                    // H2 database for tests
-  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",           // Para hashear passwords
-  "org.pac4j" %% "play-pac4j" % "12.0.0-PLAY3.0",          // Seguridad (OAuth)
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",           // For password hashing
+  "org.pac4j" %% "play-pac4j" % "12.0.0-PLAY3.0",          // Security (OAuth)
   "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0" % Test
 )

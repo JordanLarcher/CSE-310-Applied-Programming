@@ -17,6 +17,9 @@ import slick.jdbc.JdbcProfile
 import play.api.data.Form
 import play.api.data.Forms._
 
+import forms._
+import forms.AuthForms._
+
 class AuthController @Inject()(
                                 protected val dbConfigProvider: DatabaseConfigProvider,
                                 cc: ControllerComponents,

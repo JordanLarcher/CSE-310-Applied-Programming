@@ -1,0 +1,13 @@
+@()(implicit request: RequestHeader)
+
+<nav class="navbar">
+    <div class="logo">
+        🍅 PomodoroApp
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="@routes.TaskController.listTasks" class="btn-nav">Timer</a>
+        <a href="@routes.ReportController.index" class="btn-nav">📊 Report</a>
+        <button onclick="openSettings()" class="btn-nav" style="cursor: pointer;">⚙ Settings</button>
+        <a href="@routes.AuthController.logout()" class="btn-nav" style="background: rgba(0,0,0,0.2);">Sign Out</a>
+    </div>
+</nav>

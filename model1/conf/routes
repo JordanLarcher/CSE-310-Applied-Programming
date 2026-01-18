@@ -20,10 +20,11 @@ POST    /tasks/:id/delete           controllers.TaskController.deleteTask(id: ja
 POST    /tasks/:id/complete         controllers.TaskController.completeTask(id: java.util.UUID)
 
 
-# Home (temporarily we redirect to login if there is no session, we will fix this later)
+# Home page
 GET     /                           controllers.HomeController.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-
+# ----- Reports ------ (Report controller)
+GET     /report                   controllers.ReportController.index

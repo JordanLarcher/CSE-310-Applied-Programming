@@ -1,5 +1,57 @@
-@(implicit request: RequestHeader)
+@()(implicit request: RequestHeader)
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
-}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Pomodoro Focus - Master your time</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+
+    <div class="container" style="margin-top: 10vh;">
+      <div style="font-size: 5rem; margin-bottom: 20px;">🍅</div>
+
+      <h1 style="font-size: 3rem; margin-bottom: 10px;">Pomodoro Focus</h1>
+      <p style="font-size: 1.2rem; opacity: 0.9; max-width: 600px; margin: 0 auto 40px auto;">
+        The simplest and most elegant way to manage your time.
+        Stay focused, take breaks, and visualize your progress with our Nordic style.
+      </p>
+
+      <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+        <a href="@routes.AuthController.showLogin" class="btn-timer-main" style="font-size: 1.1rem; padding: 15px 30px; text-decoration: none; width: auto;">
+          Login
+        </a>
+
+        <a href="@routes.AuthController.showRegister" class="btn-nav" style="background: rgba(255,255,255,0.2); font-size: 1.1rem; padding: 15px 30px;">
+          Create Account
+        </a>
+      </div>
+
+      <div style="margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: left;">
+        <div class="task-card">
+          <div>
+            <h3 style="margin:0; color: var(--primary);">⏱ Timer</h3>
+            <p style="font-size: 0.9rem; color: #666;">Customizable Pomodoro timer.</p>
+          </div>
+        </div>
+        <div class="task-card">
+          <div>
+            <h3 style="margin:0; color: var(--primary);">✅ Tasks</h3>
+            <p style="font-size: 0.9rem; color: #666;">Organize and prioritize your daily work.</p>
+          </div>
+        </div>
+        <div class="task-card">
+          <div>
+            <h3 style="margin:0; color: var(--primary);">📊 Reports</h3>
+            <p style="font-size: 0.9rem; color: #666;">Analyze your historical performance.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer style="margin-top: auto; padding: 20px; opacity: 0.6; font-size: 0.8rem;">
+          &copy; 2026 Pomodoro App Inc.
+    </footer>
+  </body>
+</html>

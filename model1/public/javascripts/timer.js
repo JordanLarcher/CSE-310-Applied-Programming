@@ -1,183 +1,270 @@
-// Global timer state management
+/**
+ * Global Timer State
+ */
 let timerState = {
-    mode: 'work',          // Current timer mode: 'work', 'short_break', or 'long_break'
-    timeRemaining: 25 * 60, // Time remaining in seconds (default: 25 minutes)
-    currentTaskId: null,   // ID of the currently active task
-    pomodoroCount: 0,      // Number of completed pomodoros in current session
-    isRunning: false,      // Flag indicating if timer is currently running
-    interval: null         // Reference to the setInterval timer
+    minutes: 25,
+    seconds: 0,
+    isRunning: false,
+    interval: null,
+    taskId: null,
+    endTime: null
 };
 
-// DOM element references for UI updates
-const timerDisplay = document.getElementById('timer-display');
-const statusDisplay = document.getElementById('status-display');
-const currentTaskDisplay = document.getElementById('current-task-name');
+// Default Settings
+let userSettings = {
+    pomodoro: 25,
+    shortBreak: 5,
+    longBreak: 15
+};
 
 /**
- * Get CSRF token from meta tag or cookie
- * @returns {string} CSRF token value
+ * --- SETTINGS FUNCTIONS (NEW) ---
  */
-function getCsrfToken() {
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag) {
-        return metaTag.getAttribute('content');
+
+function openSettings() {
+    // 1. Fill inputs with current values
+    document.getElementById('setting-pomodoro').value = userSettings.pomodoro;
+    document.getElementById('setting-short').value = userSettings.shortBreak;
+    document.getElementById('setting-long').value = userSettings.longBreak;
+
+    // 2. Show Modal
+    document.getElementById('settings-modal').style.display = 'flex';
+}
+
+function closeSettings() {
+    document.getElementById('settings-modal').style.display = 'none';
+}
+
+function saveSettings() {
+    // 1. Get values from inputs
+    const pomo = parseInt(document.getElementById('setting-pomodoro').value) || 25;
+    const short = parseInt(document.getElementById('setting-short').value) || 5;
+    const long = parseInt(document.getElementById('setting-long').value) || 15;
+
+    // 2. Update global settings
+    userSettings = { pomodoro: pomo, shortBreak: short, longBreak: long };
+
+    // 3. Save to LocalStorage
+    localStorage.setItem('userSettings', JSON.stringify(userSettings));
+
+    // 4. Close Modal
+    closeSettings();
+
+    // 5. If timer is NOT running, apply changes immediately
+    if (!timerState.isRunning) {
+        resetTimer();
     }
-    // Fallback to cookie method
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'Play-CSRF-Token') {
-            return decodeURIComponent(value);
-        }
-    }
-    return 'nocheck'; // Fallback for development
 }
 
 /**
- * Update task progress in UI without page reload
- * @param {string} taskId - Task ID
- * @param {object} data - Response data with updated progress
+ * --- EXISTING TIMER LOGIC ---
  */
-function updateTaskProgress(taskId, data) {
-    // Find the task row and update progress display
-    const taskRows = document.querySelectorAll('tbody tr');
-    taskRows.forEach(row => {
-        const startButton = row.querySelector('.btn-start');
-        if (startButton && startButton.getAttribute('onclick').includes(taskId)) {
-            const progressCell = row.cells[1]; // Progress column
-            const statusCell = row.cells[2];   // Status column
-            
-            // Update progress
-            progressCell.textContent = `${data.completed}/${data.completed === row.dataset.estimated ? data.completed : row.dataset.estimated}`;
-            
-            // Update status if completed
-            if (data.status === 'done') {
-                statusCell.innerHTML = '<span class="badge-done">Completed</span>';
-                startButton.style.display = 'none'; // Hide start button for completed tasks
-            }
-        }
-    });
+
+function saveState() {
+    const stateToSave = {
+        minutes: timerState.minutes,
+        seconds: timerState.seconds,
+        isRunning: timerState.isRunning,
+        taskId: timerState.taskId,
+        endTime: timerState.endTime,
+        taskNameHTML: document.getElementById('current-task-name')?.innerHTML
+    };
+    localStorage.setItem('pomodoroState', JSON.stringify(stateToSave));
 }
 
-/**
- * Start the timer for a specific task
- * Called when user clicks the start button on a task
- * @param {string} taskId - Unique identifier of the task
- * @param {string} taskName - Display name of the task
- */
-function startTimer(taskId, taskName) {
-    // Prevent restarting if same task is already running
-    if (timerState.isRunning && timerState.currentTaskId === taskId) return;
-
-    // Reset to work mode if switching tasks
-    if (timerState.currentTaskId !== taskId) {
-        timerState.mode = 'work';
-        timerState.timeRemaining = 25 * 60;
-        timerState.currentTaskId = taskId;
-        currentTaskDisplay.textContent = "Working on: " + taskName;
-        currentTaskDisplay.style.display = 'block';
+function loadState() {
+    // Load User Settings First
+    const savedSettings = localStorage.getItem('userSettings');
+    if (savedSettings) {
+        userSettings = JSON.parse(savedSettings);
     }
+
+    const saved = localStorage.getItem('pomodoroState');
+    if (!saved) {
+        // Apply default setting if no state exists
+        timerState.minutes = userSettings.pomodoro;
+        updateDisplay();
+        return;
+    }
+
+    const state = JSON.parse(saved);
+    timerState.taskId = state.taskId;
+
+    if (state.taskNameHTML) {
+        const nameDisplay = document.getElementById('current-task-name');
+        if (nameDisplay) {
+            nameDisplay.innerHTML = state.taskNameHTML;
+            nameDisplay.style.opacity = "1";
+        }
+    }
+
+    if (state.taskId) highlightActiveCard(state.taskId);
+
+    if (state.isRunning && state.endTime) {
+        const now = Date.now();
+        const remainingMs = state.endTime - now;
+
+        if (remainingMs > 0) {
+            const totalSeconds = Math.floor(remainingMs / 1000);
+            timerState.minutes = Math.floor(totalSeconds / 60);
+            timerState.seconds = totalSeconds % 60;
+            timerState.endTime = state.endTime;
+            timerState.isRunning = true;
+            startTimerInternal();
+        } else {
+            timerState.minutes = 0;
+            timerState.seconds = 0;
+            completeTimer();
+            return;
+        }
+    } else {
+        timerState.minutes = state.minutes;
+        timerState.seconds = state.seconds;
+        timerState.isRunning = false;
+        updateButtonText("RESUME");
+        const statusDisplay = document.getElementById('status-display');
+        if (statusDisplay) statusDisplay.innerText = "⏸ PAUSED";
+    }
+    updateDisplay();
+}
+
+function updateDisplay() {
+    const minStr = String(timerState.minutes).padStart(2, '0');
+    const secStr = String(timerState.seconds).padStart(2, '0');
+    document.title = `${minStr}:${secStr} - Focus!`;
+    const display = document.getElementById('timer-display');
+    if (display) display.innerText = `${minStr}:${secStr}`;
+}
+
+function handleMainButton() {
+    if (timerState.isRunning) {
+        pauseTimer();
+    } else {
+        if (!timerState.taskId) {
+            alert("⚠️ Please select a task from the list first.");
+            return;
+        }
+        startTimer();
+    }
+}
+
+function startTimer(taskId = null, taskName = null) {
+    if (timerState.isRunning) return;
+
+    if (taskId) {
+        timerState.taskId = taskId;
+        const nameDisplay = document.getElementById('current-task-name');
+        if (nameDisplay && taskName) {
+            nameDisplay.innerHTML = `Working on: <strong>${taskName}</strong>`;
+        }
+        highlightActiveCard(taskId);
+    }
+
+    // CALCULATE END TIME
+    const now = Date.now();
+    const remainingMs = (timerState.minutes * 60 + timerState.seconds) * 1000;
+    timerState.endTime = now + remainingMs;
 
     timerState.isRunning = true;
+    startTimerInternal();
+}
 
-    // Clear existing interval and start new one
+function startTimerInternal() {
+    updateButtonText("PAUSE");
+    const statusDisplay = document.getElementById('status-display');
+    if (statusDisplay) statusDisplay.innerText = "🔥 FOCUSING...";
+
+    saveState();
+
     if (timerState.interval) clearInterval(timerState.interval);
-    timerState.interval = setInterval(tick, 1000);
 
-    updateDisplay();
-}
+    timerState.interval = setInterval(() => {
+        const now = Date.now();
+        const distance = timerState.endTime - now;
 
-/**
- * Timer tick function called every second
- * Decrements time remaining and handles cycle completion
- */
-function tick() {
-    if (timerState.timeRemaining > 0) {
-        timerState.timeRemaining--;
-        updateDisplay();
-    } else {
-        finishCycle();
-    }
-}
-
-/**
- * Update the timer display with current time and status
- * Formats time as MM:SS and updates status text and colors
- */
-function updateDisplay() {
-    const minutes = Math.floor(timerState.timeRemaining / 60);
-    const seconds = timerState.timeRemaining % 60;
-    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-    // Update display colors and status based on current mode
-    if (timerState.mode === 'work') {
-        timerDisplay.style.color = '#d9534f'; // Red for work
-        statusDisplay.textContent = "🔥 FOCUS";
-    } else {
-        timerDisplay.style.color = '#5cb85c'; // Green for break
-        statusDisplay.textContent = "☕ BREAK";
-    }
-}
-
-/**
- * Handle completion of a timer cycle (work or break)
- * Plays alert sound, saves progress, and switches modes
- */
-function finishCycle() {
-    clearInterval(timerState.interval);
-    timerState.isRunning = false;
-
-    // Play completion sound (ensure alert.mp3 exists in public/audios/)
-    try {
-        new Audio('/assets/audios/alert.mp3').play();
-    } catch (e) { console.log("Audio file not found"); }
-
-    // Handle work session completion
-    if (timerState.mode === 'work') {
-        fetch(`/tasks/${timerState.currentTaskId}/complete`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Csrf-Token': getCsrfToken()
-            }
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Failed to complete task');
-        }).then(data => {
-            console.log("Progress saved:", data);
-            // Update UI without page reload
-            updateTaskProgress(timerState.currentTaskId, data);
-        }).catch(error => {
-            console.error("Error saving progress:", error);
-        });
-
-        timerState.pomodoroCount++;
-
-        // Determine break type: long break after 4 pomodoros, short break otherwise
-        if (timerState.pomodoroCount % 4 === 0) {
-            timerState.mode = 'long_break';
-            timerState.timeRemaining = 15 * 60; // 15 minutes
+        if (distance < 0) {
+            completeTimer();
         } else {
-            timerState.mode = 'short_break';
-            timerState.timeRemaining = 5 * 60;  // 5 minutes
+            const totalSeconds = Math.floor(distance / 1000);
+            timerState.minutes = Math.floor(totalSeconds / 60);
+            timerState.seconds = totalSeconds % 60;
+            updateDisplay();
+            saveState();
         }
-    } else {
-        // End of break -> return to work
-        timerState.mode = 'work';
-        timerState.timeRemaining = 25 * 60;
-    }
-
-    updateDisplay();
-    alert("Time's up! Next phase: " + (timerState.mode === 'work' ? "Work" : "Break"));
+    }, 1000);
 }
 
-/**
- * Pause the timer manually
- * Clears the interval and updates the running state
- */
 function pauseTimer() {
     clearInterval(timerState.interval);
     timerState.isRunning = false;
+    timerState.endTime = null;
+    updateButtonText("RESUME");
+    const statusDisplay = document.getElementById('status-display');
+    if (statusDisplay) statusDisplay.innerText = "⏸ PAUSED";
+    saveState();
 }
+
+function resetTimer() {
+    if (timerState.interval) clearInterval(timerState.interval);
+    timerState.isRunning = false;
+
+    // USE THE SAVED SETTING HERE
+    timerState.minutes = userSettings.pomodoro;
+    timerState.seconds = 0;
+    timerState.endTime = null;
+
+    updateDisplay();
+    updateButtonText("START");
+
+    const statusDisplay = document.getElementById('status-display');
+    if (statusDisplay) statusDisplay.innerText = "READY TO FOCUS";
+
+    localStorage.removeItem('pomodoroState');
+}
+
+function completeTimer() {
+    clearInterval(timerState.interval);
+    timerState.isRunning = false;
+    localStorage.removeItem('pomodoroState');
+
+    timerState.minutes = 0;
+    timerState.seconds = 0;
+    updateDisplay();
+
+    alert("🎉 Pomodoro Completed!");
+
+    if (timerState.taskId) {
+        fetch(`/tasks/${timerState.taskId}/complete`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Csrf-Token': 'nocheck' }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    } else {
+        resetTimer();
+    }
+}
+
+function highlightActiveCard(id) {
+    document.querySelectorAll('.task-card').forEach(card => card.classList.remove('active-task'));
+    const activeCard = document.getElementById(`task-card-${id}`);
+    if (activeCard) activeCard.classList.add('active-task');
+}
+
+function updateButtonText(text) {
+    const btn = document.getElementById('main-btn');
+    if(btn) btn.innerText = text;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('settings-modal');
+    if (event.target == modal) {
+        closeSettings();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadState);

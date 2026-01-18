@@ -1,0 +1,44 @@
+@(totalTasks: Int, completedTasks: Int, totalPomodoros: Int, hoursFocused: Double)(implicit request: RequestHeader)
+
+@main("My Productivity Report") {
+
+    @navbar()
+
+    <div class="container" style="max-width: 700px;">
+
+        <h2 style="margin-bottom: 30px; color: white;">📊 My Activity</h2>
+
+        <div class="timer-box" style="padding: 40px; margin-bottom: 30px;">
+            <div style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 10px;">TOTAL FOCUSED TIME</div>
+            <div style="font-size: 4rem; font-weight: 800; color: white;">
+                @hoursFocused.toString.take(4) <span style="font-size: 1.5rem;">Hours</span>
+            </div>
+            <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">
+                (Equivalent to @totalPomodoros cycles of 25 min)
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <div class="task-card" style="display: block; text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: var(--primary);">
+                @completedTasks
+                </div>
+                <div style="color: #777; font-weight: 600;">Tasks Completed</div>
+            </div>
+
+            <div class="task-card" style="display: block; text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: #88c0d0;">
+                @totalTasks
+                </div>
+                <div style="color: #777; font-weight: 600;">Total Tasks</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+            <a href="@routes.TaskController.listTasks" class="btn-nav" style="background: rgba(255,255,255,0.2);">
+                ← Back to Timer
+            </a>
+        </div>
+    </div>
+}
