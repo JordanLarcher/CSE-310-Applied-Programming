@@ -28,3 +28,8 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 # ----- Reports ------ (Report controller)
 GET     /report                   controllers.ReportController.index
+
+
+# Profile Page 
+GET     /profile                    controllers.ProfileController.showProfile
+POST  /profile                    controllers.ProfileController.updateProfile

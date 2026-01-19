@@ -12,6 +12,7 @@ import java.util.UUID
 import java.sql.Timestamp
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
+import services.TaskService
 
 /**
  * Form data case class for task creation and editing
@@ -23,6 +24,7 @@ case class TaskData(description: String, estimated: Int)
 class TaskController @Inject()(
     protected val dbConfigProvider: DatabaseConfigProvider,
     cc: ControllerComponents,
+    taskService: TaskService,
     messagesApi: play.api.i18n.MessagesApi
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with Secured with I18nSupport {
 
@@ -48,9 +50,9 @@ class TaskController @Inject()(
    * @return HTML page with task list
    */
   def listTasks = withAuth { userId => implicit request =>
-    val query = Tasks.tasks.filter(_.userId === userId).sortBy(_.createdAt.desc)
-    db.run(query.result).map { tasks =>
-      Ok(views.html.taskList(tasks)) // Render the task list view
+    //Delegate to the Task Service
+    taskService.list(userId).map { tasks => 
+        Ok(views.html.taskList(tasks))
     }.recover {
       case ex: Exception =>
         InternalServerError("Error loading tasks: " + ex.getMessage)
@@ -90,11 +92,8 @@ class TaskController @Inject()(
           currentTime, 
           currentTime
         )
-        db.run(Tasks.tasks += newTask).map(_ => Redirect(routes.TaskController.listTasks))
-          .recover {
-            case ex: Exception =>
-              InternalServerError(views.html.createTask(taskForm.withGlobalError("Failed to create task")))
-          }
+        // Delegate to the TaskService
+        taskService.create(newTask).map(_ => Redirect(routes.TaskController.listTasks))
       }
     )
   }
@@ -108,14 +107,12 @@ class TaskController @Inject()(
    * @return HTML page with task editing form or 404 if task not found
    */
   def showEditTask(id: UUID) = withAuth { userId => implicit request =>
-    // Find the task and verify it belongs to the user
-    val query = Tasks.tasks.filter(t => t.id === id && t.userId === userId)
-    db.run(query.result.headOption).map {
-      case Some(task) =>
-        // Fill the form with existing data
+    // Delegate to the TaskService
+    taskService.getById(id, userId).map {
+      case Some(task) => 
         val filledForm = taskForm.fill(TaskData(task.description, task.estimatedPomodoros))
         Ok(views.html.editTask(id, filledForm))
-      case None => NotFound("Task not found")
+      case None => NotFound("Task not found") 
     }
   }
 
@@ -131,16 +128,10 @@ class TaskController @Inject()(
     taskForm.bindFromRequest().fold(
       formWithErrors => Future.successful(BadRequest(views.html.editTask(id, formWithErrors))),
       data => {
-        val query = Tasks.tasks.filter(t => t.id === id && t.userId === userId)
-        val updateAction = query.map(t => (t.description, t.estimatedPomodoros, t.updatedAt))
-          .update((data.description.trim, data.estimated, new Timestamp(System.currentTimeMillis())))
-        
-        db.run(updateAction).map { rowsUpdated =>
-          if (rowsUpdated > 0) {
-            Redirect(routes.TaskController.listTasks)
-          } else {
-            NotFound("Task not found")
-          }
+        // Delegated to the taskSer
+        taskService.update(id, userId, data.description.trim, data.estimated).map { rowsUpdated =>
+          if (rowsUpdated > 0) Redirect(routes.TaskController.listTasks)
+          else NotFound("Task not found")
         }.recover {
           case ex: Exception =>
             InternalServerError(views.html.editTask(id, taskForm.withGlobalError("Failed to update task")))
@@ -158,16 +149,10 @@ class TaskController @Inject()(
    * @return Redirect to task list
    */
   def deleteTask(id: UUID) = withAuth { userId => implicit request =>
-    val query = Tasks.tasks.filter(t => t.id === id && t.userId === userId)
-    db.run(query.delete).map { rowsDeleted =>
-      if (rowsDeleted > 0) {
-        Redirect(routes.TaskController.listTasks)
-      } else {
-        NotFound("Task not found")
-      }
-    }.recover {
-      case ex: Exception =>
-        InternalServerError("Failed to delete task")
+    // Delegated to the taskService
+    taskService.delete(id, userId).map { rowsDeleted =>
+      if (rowsDeleted > 0 ) Redirect(routes.TaskController.listTasks)
+      else NotFound("Task not found")
     }
   }
 
@@ -180,24 +165,20 @@ class TaskController @Inject()(
    * @return JSON response for AJAX requests or redirect for form submissions
    */
   def completeTask(id: UUID) = withAuth { userId => implicit request =>
-    val query = Tasks.tasks.filter(t => t.id === id && t.userId === userId)
-    db.run(query.result.headOption).flatMap {
-      case Some(task) =>
-        val newCompleted = task.completedPomodoros + 1
-        val newStatus = if (newCompleted >= task.estimatedPomodoros) "done" else "in_progress"
-        val updateQuery = query.map(t => (t.completedPomodoros, t.status, t.updatedAt))
-          .update((newCompleted, newStatus, new Timestamp(System.currentTimeMillis())))
-        
-        // If request accepts JSON (AJAX) respond with JSON, otherwise redirect
-        db.run(updateQuery).map { _ => 
-            if (request.accepts("application/json")) {
-              Ok(s"""{"success": true, "completed": $newCompleted, "status": "$newStatus"}""")
-                .as("application/json")
-            } else {
-              Redirect(routes.TaskController.listTasks)
-            }
+    // Delegated the complex logic to the taskService
+    taskService.completePomodoro(id, userId).map {
+      case Some(( newCompleted, newStatus)) =>
+        if (request.accepts("application/json")) {
+          Ok(s"""{"success": true, "completed": $newCompleted, "status": "$newStatus"}""").as("application/json")
+        } else {
+          Redirect(routes.TaskController.listTasks)
         }
-      case None => Future.successful(NotFound("Task not found"))
+      case None => 
+        if (request.accepts("application/json")) {
+          NotFound("""{"error": "Task not found"}""").as("application/json")
+        } else {
+          NotFound("Task not found")
+        }
     }.recover {
       case ex: Exception =>
         if (request.accepts("application/json")) {

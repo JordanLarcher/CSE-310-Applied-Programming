@@ -1,0 +1,63 @@
+@(user: models.User, form: Form[controllers.ProfileData])(implicit request: RequestHeader, messages: Messages)
+
+@main("My Profile") {
+    @navbar()
+
+    <div class="container" style="max-width: 600px; margin-top: 40px;">
+        <div class="card">
+            <!-- Header Section -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 4rem; margin-bottom: 10px;">👤</div>
+                <h2 style="margin-bottom: 5px;">@user.displayName.getOrElse("User")</h2>
+                <p style="color: var(--text-light); margin-top: 0;">Manage your account details</p>
+            </div>
+
+            <!-- Success Notification -->
+            @request.flash.get("success").map { msg =>
+                <div style="background: #eef4fa; color: var(--primary); padding: 12px; border-radius: 6px; margin-bottom: 25px; text-align: center; font-weight: bold; border: 1px solid var(--primary);">
+                    ✓ @msg
+                </div>
+            }
+
+            <!-- Read-Only Information -->
+            <div style="background: var(--secondary); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: var(--text-dark);">Email:</strong> 
+                    <span style="color: var(--text-light); float: right;">@user.email</span>
+                </div>
+                <div>
+                    <strong style="color: var(--text-dark);">Member Since:</strong> 
+                    <!-- Simple date formatting -->
+                    <span style="color: var(--text-light); float: right;">
+                        @user.createdAt.toLocalDateTime().toLocalDate().toString()
+                    </span>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <!-- Edit Form -->
+            <h3 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 15px;">Edit Profile</h3>
+            
+            @helper.form(action = routes.ProfileController.updateProfile) {
+                @helper.CSRF.formField
+                
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" name="displayName" value="@form("displayName").value" class="form-control" required>
+                    
+                    @if(form.error("displayName").isDefined) {
+                        <small style="color: #bf616a; margin-top: 5px; display: block;">
+                            @form.error("displayName").get.message
+                        </small>
+                    }
+                </div>
+
+                <div class="form-actions">
+                    <a href="@routes.TaskController.listTasks" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">Update Profile</button>
+                </div>
+            }
+        </div>
+    </div>
+}
