@@ -1,86 +1,119 @@
-Dynamic Pomodoro Timer
+🍅 Dynamic Pomodoro Timer
 
-This is a productivity app that combines a task list with a Pomodoro timer. I built it to help focus on specific tasks without getting distracted by complicated features. It’s designed to be clean, simple, and easy on the eyes (thanks to the Nordic color theme).
+Stop juggling tabs. Get in the zone.
 
-What it does
+This isn't just another timer app. I built this to solve a specific problem: the disconnect between to-do lists and doing the work.
 
-The core idea is simple: you create a task, estimate how many "pomodoros" (25-minute blocks) it will take, and then start the timer.
+Dynamic Pomodoro Timer anchors your focus session to a specific task, ensuring you're not just "working," but working on the right thing. Wrapped in a soothing Nordic color palette, it's designed to reduce eye strain and keep you calm while you crush your goals.
 
-Focus Timer: Handles the standard work/break cycle. You can customize the times for work, short breaks, and long breaks.
+✨ Key Features
 
-Task List: You can add, edit, and delete tasks. The timer is "anchored" to a specific task so you know exactly what you're working on.
+🎯 Anchored Focus: You don't just start a timer; you start a task. The UI highlights exactly what you should be doing right now.
 
-Reports: It tracks your completed cycles so you can see how much time you've actually spent working.
+🧠 Smart Cycles: Automatically manages the flow between Focus, Short Breaks, and Long Breaks.
 
-User Accounts: You have your own account, so your tasks and settings are private.
+📊 Productivity Reports: Tracks every completed cycle. See exactly how many hours of deep work you've logged.
 
-Persistence: If you accidentally close the tab or refresh the page, the timer remembers where it was.
+💾 Bulletproof Persistence: Accidentally closed the tab? Refreshed the page? No problem. The timer state uses local storage to pick up exactly where you left off.
 
-Tech Stack
+🎨 Nordic UI: A custom-designed interface based on the popular Nord theme. Minimalist, clean, and beautiful.
 
-I used this project to work with a robust JVM stack:
+🔒 Private Accounts: Your tasks and data are yours. Full user authentication ensures privacy.
 
-Backend: Scala with Play Framework.
+🛠 The Tech Stack
 
-Database: PostgreSQL (using Slick for database access).
+I chose a robust, industrial-strength stack for this project to ensure type safety and performance.
 
-Frontend: Server-side rendered HTML (Twirl templates) with vanilla JavaScript. I kept the JS simple—no React or Angular, just clean logic to handle the timer state.
+Component
 
-Styling: Custom CSS.
+Technology
 
-How to Run It
+Why?
 
-Prerequisites
+Backend
 
-You need to have these installed on your machine:
+Scala + Play Framework
 
-Java JDK 21
+High concurrency, type safety, and great developer experience.
+
+Database
+
+PostgreSQL + Slick
+
+Relational data integrity with a functional database access library.
+
+Frontend
+
+Twirl + Vanilla JS
+
+Server-side rendering for speed, with lightweight JS for the timer logic. No heavy frameworks required.
+
+Styling
+
+Custom CSS
+
+Hand-crafted styles using CSS Variables for consistent theming.
+
+🚀 Getting Started
+
+Ready to focus? Let's get this running on your machine.
+
+1. Prerequisites
+
+Ensure you have the following installed:
+
+Java JDK 21 (The engine)
 
 SBT (Scala Build Tool)
 
-PostgreSQL
+PostgreSQL (The database)
 
-Database Setup
+2. Database Setup
 
-Before running the app, create a local database and a user for it. You can run these commands in your Postgres terminal (psql):
+Create the local database. Open your terminal or psql tool and run:
 
 CREATE USER pomodoro_user WITH PASSWORD '1998';
 CREATE DATABASE pomodoro_db OWNER pomodoro_user;
 
 
-Note: If you want to use different credentials, just update the conf/application.conf file.
+> Note: If you prefer different credentials, just update conf/application.conf.
 
-Running the App
+3. Run the App
 
-Clone this repository.
+Clone the repo and fire it up:
 
-Open your terminal in the project folder.
-
-Run the server:
-
+# Install dependencies and start the server
 sbt run
 
 
-(The first time you run this, it might take a while to download dependencies).
+(Grab a coffee ☕ the first time you run this; SBT needs to download the internet).
 
-Open your browser and go to http://localhost:9000.
+Once you see Server started, open http://localhost:9000.
 
-You will see a red button asking to apply a database script ("Apply Evolutions"). Click it. This creates the necessary tables for you.
+> Pro Tip: You will see a red button saying "Apply Evolutions". Click it! This automatically creates your database tables.
 
-Project Structure
+📂 Project Structure
 
-If you want to look at the code:
+Here is a map of the territory if you want to explore the code:
 
-app/controllers/: Handles the web requests (TaskController, AuthController, etc.).
+app/controllers/ 🎮
 
-app/services/: Contains the business logic, keeping the controllers clean.
+TaskController.scala: Handles CRUD operations for tasks.
 
-app/views/: The HTML templates.
+ReportController.scala: Calculates productivity stats.
 
-public/javascripts/: The logic for the timer and local storage.
+app/services/ 🧠
 
-conf/routes: Defines all the URLs for the application.
+TaskService.scala: Contains the business logic, keeping controllers clean.
 
-Credits
+app/views/ 🖼️
 
-Created as a project to explore full-stack development with Scala. Feel free to use it or modify it for your own workflow.
+Contains the HTML templates (Twirl).
+
+public/javascripts/timer.js ⏱️
+
+The brain of the frontend. Handles the countdown, state saving, and audio alerts.
+
+conf/routes 🚦
+
+The API definition file.
