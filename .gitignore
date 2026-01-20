@@ -13,3 +13,5 @@ application.conf
 .metals
 .vscode
 .scala-build
+.bloop
+application.conf

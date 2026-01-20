@@ -1,0 +1,132 @@
+@(tasks: Seq[models.Task])(implicit request: RequestHeader)
+
+@main("Pomodoro Focus") {
+
+
+    @navbar()
+@*    <nav class="navbar">*@
+@*        <div class="logo">*@
+@*            ✅ PomodoroApp*@
+@*        </div>*@
+@*        <div>*@
+@*            <a href="@routes.AuthController.logout()" class="btn-nav">Sign Out</a>*@
+@*        </div>*@
+@*    </nav>*@
+
+    <div class="container">
+
+        <div class="timer-box">
+            <div id="status-display" class="timer-status">READY TO FOCUS</div>
+
+            <div id="timer-display" class="timer-digits">25:00</div>
+
+            <div id="current-task-name" style="margin-bottom: 20px; font-size: 1.1rem; min-height: 25px;">
+                <span style="opacity: 0.7;">Select a task below</span>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <button id="main-btn" class="btn-timer-main" onclick="toggleTimer()">START</button>
+            </div>
+        </div>
+
+        <div class="tasks-header">
+            <span class="tasks-title">My Tasks</span>
+            <a href="@routes.TaskController.showCreateTask" class="btn-nav" style="background: rgba(255,255,255,0.2);">+</a>
+        </div>
+
+        <div class="task-list">
+            @if(tasks.isEmpty) {
+                <div style="padding: 20px; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                    You have no pending tasks. Add one!
+                </div>
+            }
+
+            @for(task <- tasks) {
+                <div id="task-card-@task.id" class="task-card" style="@if(task.status == "done") { opacity: 0.6; }">
+
+                    <div class="task-info">
+                        <span class="task-desc" style="@if(task.status == "done") { text-decoration: line-through; }">
+                        @task.description
+                        </span>
+                        <div class="task-meta">
+                            <span style="font-weight: bold; font-size: 1.1rem;">@task.completedPomodoros</span>
+                            <span style="font-size: 0.9rem;">/ @task.estimatedPomodoros</span>
+                        </div>
+                    </div>
+
+                    <div class="task-actions">
+                        @if(task.status != "done") {
+                            <button class="btn-icon" onclick="selectTask('@task.id', '@task.description')" title="Work on this">
+                            ▶
+                            </button>
+                            } else {
+                            <span class="badge-done">✔</span>
+                        }
+
+                    <a href="@routes.TaskController.showEditTask(task.id)" class="btn-icon">✏️</a>
+
+                    <form action="@routes.TaskController.deleteTask(task.id)" method="post" style="display:inline;" onsubmit="return confirm('Delete?');">
+                        @helper.CSRF.formField
+                    <button type="submit" class="btn-icon" style="color: #e74c3c;">🗑</button>
+                    </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <a href="@routes.TaskController.showCreateTask" class="btn-add-task">
+            + Add Task
+        </a>
+    </div>
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>TIMER SETTING</h3>
+                <button onclick="closeSettings()" class="close-btn">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #555; font-size: 0.9rem; font-weight: bold;">Time (minutes)</label>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Pomodoro</label>
+                        <input type="number" id="setting-pomodoro" class="form-control" value="25">
+                    </div>
+                    <div class="setting-item">
+                        <label>Short Break</label>
+                        <input type="number" id="setting-short" class="form-control" value="5">
+                    </div>
+                    <div class="setting-item">
+                        <label>Long Break</label>
+                        <input type="number" id="setting-long" class="form-control" value="15">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <button onclick="saveSettings()" class="btn-primary" style="width: auto; padding: 10px 30px;">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        // --- SECURITY FIX: Inject current user ID ---
+        const currentUserId = "@userId";
+        // Bridge function to handle the main button
+        function toggleTimer() {
+            handleMainButton();
+        }
+
+        // Helper function for when they click ▶ in the list
+        function selectTask(id, desc) {
+            // Reset timer logic from timer.js
+            resetTimer();
+            startTimer(id, desc);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+
+    <script src="@routes.Assets.versioned('javascripts/timer.js')"></script>
+}
